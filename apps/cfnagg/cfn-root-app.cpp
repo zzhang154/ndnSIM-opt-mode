@@ -76,6 +76,9 @@ CFNRootApp::StartApplication() {
   // (Root's prefix registration is not strictly needed unless external consumer interests target the root)
   if (!m_prefix.empty()) {
     ndn::FibHelper::AddRoute(GetNode(), m_prefix, m_face, 0);
+    std::cout << "Root " << Names::FindName(GetNode())
+              << ": added FIB route for exact prefix " << m_prefix 
+              << " via local face " << m_face->getId() << std::endl;
   }
 
   // Instantiate the chosen congestion control algorithm
@@ -135,11 +138,15 @@ CFNRootApp::SendInterest(int seq) {
       interest->setInterestLifetime(ndn::time::milliseconds(static_cast<int>(m_childTimeout * 1000)));
 
       NS_LOG_INFO("Root sending Interest " << interest->getName() 
-                  << " to child [" << childName << "]");
+            << " to child [" << childName << "]"
+            << " via face " << m_face->getId());
+            
       m_transmittedInterests(interest, this, m_face);
       
-      // CRITICAL FIX: Use the correct method to send interests
-      // m_face->sendInterest(*interest);  // Use this method instead of m_appLink->onReceiveInterest
+      // INCORRECT: This cannot also work
+      // m_face->sendInterest(*interest);
+
+      // CORRECT: Use only this method to properly send interests
       m_appLink->onReceiveInterest(*interest);
   }
 

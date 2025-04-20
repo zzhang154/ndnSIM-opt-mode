@@ -1,0 +1,14 @@
+# Minimal Aggregation Tree for CFNAgg test
+# Created: 2025-04-19 10:05:42 UTC
+# Author: zzhang154
+# Format: ParentNode Child1 Child2 ...
+
+# Tree Visualization:
+# Root
+#  └── Agg1
+#       ├── Leaf1
+#       └── Leaf2
+
+# Hierarchical Definitions:
+Root Agg1
+Agg1 Leaf1 Leaf2

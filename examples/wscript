@@ -17,3 +17,5 @@ def build(bld):
 
     # Add this line to process the cfnagg directory
     bld.recurse('cfnagg')
+    bld.recurse('cfnagg-lite')
+    bld.recurse('agg-mini')

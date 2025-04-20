@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-// ADD THIS: Define log component for this file
+// Define log component for this file
 NS_LOG_COMPONENT_DEFINE("CFNAggregationSim");
 
 using namespace ns3;
@@ -32,7 +32,7 @@ PrintFib(Ptr<Node> node, std::ostream &os)
   // Access the FIB
   nfd::fib::Fib &fib = forwarder->getFib();
 
-  // Use iterators to access FIB entries
+  // Iterate to output FIB entries
   os << "FIB entries for node " << Names::FindName(node) << ":" << std::endl;
   for (auto it = fib.begin(); it != fib.end(); ++it) {
     const auto &entry = *it;
@@ -40,7 +40,7 @@ PrintFib(Ptr<Node> node, std::ostream &os)
     const auto &nhs = entry.getNextHops();
     for (const auto &nh : nhs) {
       os << "[face " << nh.getFace().getId() 
-      << ", cost " << nh.getCost() << "] ";
+         << ", cost " << nh.getCost() << "] ";
     }
     os << std::endl;
   }
@@ -70,28 +70,24 @@ int main(int argc, char* argv[]) {
   std::cout << "Debugging node names:" << std::endl;
   NodeContainer testNodes = NodeContainer::GetGlobal();
   for (uint32_t i = 0; i < testNodes.GetN(); i++) {
-  std::cout << "Node " << i << " name: '" << Names::FindName(testNodes.Get(i)) << "'" << std::endl;
+    std::cout << "Node " << i << " name: '" << Names::FindName(testNodes.Get(i)) << "'" << std::endl;
   }
 
-  // ADD THIS: Enable NFD-level logging for debugging
+  // Enable detailed NFD logging for debugging
   NS_LOG_INFO("Enabling detailed NFD logging");
-  // Replace invalid logging components with valid ones
   ns3::LogComponentEnable("ndn-cxx.nfd.Forwarder", ns3::LOG_LEVEL_DEBUG);
   ns3::LogComponentEnable("ndn.L3Protocol", ns3::LOG_LEVEL_DEBUG);
-
+  ns3::LogComponentEnable("ndn-cxx.nfd.FaceTable", ns3::LOG_LEVEL_DEBUG);
+  ns3::LogComponentEnable("ndn-cxx.nfd.FaceManager", ns3::LOG_LEVEL_DEBUG);
+  
   // Install NDN stack on all nodes
   ns3::ndn::StackHelper ndnHelper;
-  ndnHelper.SetDefaultRoutes(true);  // enables forwarding strategy to default route if necessary
-  
-  ndnHelper.setCsSize(10000); 
-  // Choose NFD content store, then set policy and size:
-  // DEBUG-FIX-Zhuoxu: If we are not sure how to use this, we can refer to the same code from other files.
+  ndnHelper.SetDefaultRoutes(true);
+  ndnHelper.setCsSize(10000);
   ndnHelper.setPolicy("nfd::cs::lru");
-
-  // Install stack
   ndnHelper.InstallAll();
 
-  // For setting forwarding strategy, use the StrategyChoiceHelper instead
+  // Set forwarding strategy: best-route for all names
   ns3::ndn::StrategyChoiceHelper::InstallAll("/", "/localhost/nfd/strategy/best-route");
 
   // Install global routing interface on all nodes
@@ -107,7 +103,7 @@ int main(int argc, char* argv[]) {
   }
   std::string line;
   while (std::getline(aggFile, line)) {
-    if (line.size() == 0 || line[0] == '#') continue; // skip empty or comment lines
+    if (line.size() == 0 || line[0] == '#') continue;
     std::stringstream ss(line);
     std::string parent;
     ss >> parent;
@@ -120,10 +116,10 @@ int main(int argc, char* argv[]) {
   }
   aggFile.close();
 
-  // Determine the root of the aggregation tree (the node that is never listed as a child)
+  // Determine the root of the aggregation tree (node that is never a child)
   std::set<std::string> allChildren;
   for (auto& kv : childrenMap) {
-    for (auto& child : kv.second) {
+    for (auto& child : kv.second ) {
       allChildren.insert(child);
     }
   }
@@ -140,7 +136,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // Identify all nodes involved in the aggregation tree (union of all parents and children)
+  // Identify all nodes in the aggregation tree (union of all parents and children)
   std::set<std::string> allNodes;
   for (auto& kv : childrenMap) {
     allNodes.insert(kv.first);
@@ -149,11 +145,10 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  // Identify leaf nodes (those that do not have children of their own in the map)
+  // Identify leaf nodes (nodes without children)
   std::vector<std::string> leaves;
   for (const std::string& node : allNodes) {
     if (childrenMap.find(node) == childrenMap.end()) {
-      // Node not present as a key in map means it has no children => leaf
       leaves.push_back(node);
     }
   }
@@ -161,7 +156,7 @@ int main(int argc, char* argv[]) {
   // Install root application on the root node
   Ptr<Node> rootNode = Names::Find<Node>(rootName);
   ns3::ndn::AppHelper rootHelper("ns3::CFNRootApp");
-  rootHelper.SetAttribute("Prefix", StringValue("/" + rootName));
+  rootHelper.SetPrefix("/" + rootName);
   rootHelper.SetAttribute("CongestionControl", StringValue(ccAlgorithm));
   rootHelper.Install(rootNode);
   Ptr<CFNRootApp> rootApp = DynamicCast<CFNRootApp>(rootNode->GetApplication(0));
@@ -172,8 +167,16 @@ int main(int argc, char* argv[]) {
     const std::string& parent = kv.first;
     if (parent == rootName) continue;
     Ptr<Node> parentNode = Names::Find<Node>(parent);
+    
+    // Create the prefix for this node
+    std::string nodePrefix = "/" + parent;
+    
+    // Print debug information
+    std::cout << "DEBUG: Creating aggregator app for node [" << parent 
+              << "] with prefix [" << nodePrefix << "]" << std::endl;
+    
     ns3::ndn::AppHelper aggHelper("ns3::CFNAggregatorApp");
-    aggHelper.SetAttribute("Prefix", StringValue("/" + parent));
+    aggHelper.SetPrefix(nodePrefix);
     aggHelper.Install(parentNode);
     Ptr<CFNAggregatorApp> aggApp = DynamicCast<CFNAggregatorApp>(parentNode->GetApplication(0));
     aggAppMap[parent] = aggApp;
@@ -183,9 +186,9 @@ int main(int argc, char* argv[]) {
   for (const std::string& leaf : leaves) {
     Ptr<Node> leafNode = Names::Find<Node>(leaf);
     ns3::ndn::AppHelper producerHelper("ns3::CFNProducerApp");
-    producerHelper.SetAttribute("Prefix", StringValue("/" + leaf));
+    producerHelper.SetPrefix("/" + leaf);
     producerHelper.Install(leafNode);
-    // (Optional: set different payload or value via attributes if desired)
+    // Optional: set producer payload attributes here if desired
   }
 
   // Configure each aggregator and the root with their children list
@@ -194,75 +197,71 @@ int main(int argc, char* argv[]) {
     const std::vector<std::string>& childList = kv.second;
     if (parent == rootName) {
       if (rootApp) {
-        // Debug statement for root app
         std::cout << "DEBUG: Setting children for Root [" << parent << "]: ";
         for (const auto& child : childList) {
           std::cout << child << " ";
-        }
+        }                           
         std::cout << std::endl;
-        
         rootApp->SetChildren(childList);
         rootApp->SetCongestionControl(ccAlgorithm);
       }
     } else {
       if (aggAppMap.find(parent) != aggAppMap.end()) {
-        // Debug statement for aggregator app
         std::cout << "DEBUG: Setting children for Aggregator [" << parent << "]: ";
         for (const auto& child : childList) {
           std::cout << child << " ";
         }
         std::cout << std::endl;
-        
         aggAppMap[parent]->SetChildren(childList);
       }
     }
   }
 
-  // Add origin (producer) prefixes to the global routing controller for all nodes
-  for (const std::string& nodeName : allNodes) {
+  // ***** Revised Section: Only add global origin prefixes for producers (leaf nodes) *****
+  for (const std::string& nodeName : leaves) {
     Ptr<Node> node = Names::Find<Node>(nodeName);
     if (node != nullptr) {
       globalRouting.AddOrigins("/" + nodeName, node);
     }
   }
 
-  // Calculate and install FIB routes
-  globalRouting.CalculateRoutes();
-
-  // Add explicit FIB entries for all parent-child relationships
+  // Add aggregator prefixes (every parent except the root)
   for (auto& kv : childrenMap) {
     const std::string& parent = kv.first;
-    Ptr<Node> parentNode = Names::Find<Node>(parent);
-    
-    for (const auto& child : kv.second) {
-      // Add a direct route from parent to child
-      std::cout << "Adding explicit route: " << parent << " -> /" << child << std::endl;
-      ns3::ndn::FibHelper::AddRoute(parentNode, "/" + child, Names::Find<Node>(child), 1);
-      
-      // Add reverse route for data packets
-      std::cout << "Adding explicit route: " << child << " -> /" << parent << std::endl;
-      ns3::ndn::FibHelper::AddRoute(Names::Find<Node>(child), "/" + parent, parentNode, 1);
+    if (parent != rootName) {
+      Ptr<Node> parentNode = Names::Find<Node>(parent);
+      if (parentNode != nullptr) {
+        globalRouting.AddOrigins("/" + parent, parentNode);
+      }
     }
   }
 
-  // After adding all routes
+  // Optionally, also add the root node’s prefix if you need the root 
+  // to originate data under /rootName
+  // Ptr<Node> rootNode = Names::Find<Node>(rootName);
+  // globalRouting.AddOrigins("/" + rootName, rootNode);
+
+  // ***************************************************************************
+
+  // Calculate and install FIB routes
+  globalRouting.CalculateRoutes();
+
+  // After adding routes, print FIB entries for debugging
   Simulator::Schedule(MilliSeconds(100), [rootNode]() {
     std::cout << "DEBUG: Printing FIB entries on Root after delay:" << std::endl;
     PrintFib(rootNode, std::cout);
   });
 
   Ptr<Node> agg1Node = Names::Find<Node>("Agg1");
-
-  // After adding all routes
   Simulator::Schedule(MilliSeconds(100), [agg1Node]() {
     std::cout << "DEBUG: Printing FIB entries on Agg1 after delay:" << std::endl;
     PrintFib(agg1Node, std::cout);
   });
 
-  // Add these lines just before Simulator::Run()
+  // Install tracing helpers
   ns3::ndn::L3RateTracer::InstallAll("packet-trace.txt", Seconds(0.5));
   ns3::ndn::AppDelayTracer::InstallAll("app-delays-trace.txt");
-  
+
   // Open the trace log file
   TraceCollector::Open(logFile);
 

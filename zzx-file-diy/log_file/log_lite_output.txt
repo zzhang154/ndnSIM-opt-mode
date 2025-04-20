@@ -1,0 +1,14 @@
+Waf: Entering directory `/home/dd/ndnSIM-2.9-official/ndnSIM-2.9-official/build'
+[2458/3316] Compiling src/ndnSIM/apps/cfnagg-lite/CFNAggregatorApp.cpp
+../src/ndnSIM/apps/cfnagg-lite/CFNAggregatorApp.cpp: In lambda function:
+../src/ndnSIM/apps/cfnagg-lite/CFNAggregatorApp.cpp:62:47: error: invalid use of incomplete type ‘using element_type = class nfd::Forwarder’ {aka ‘class nfd::Forwarder’}
+   62 |     for (const auto& face : l3->getForwarder()->getFaceTable()) {
+      |                                               ^~
+In file included from ../src/ndnSIM/apps/cfnagg-lite/CFNAggregatorApp.cpp:6:
+./ns3/ndnSIM/model/ndn-l3-protocol.hpp:36:7: note: forward declaration of ‘using element_type = class nfd::Forwarder’ {aka ‘class nfd::Forwarder’}
+   36 | class Forwarder;
+      |       ^~~~~~~~~
+
+Waf: Leaving directory `/home/dd/ndnSIM-2.9-official/ndnSIM-2.9-official/build'
+Build failed
+ -> task in 'ns3-ndnSIM' failed with exit status 1 (run with -v to display more information)

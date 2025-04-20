@@ -13,7 +13,14 @@
 #include <cstdlib>
 #include "straggler-manager.hpp"
 #include "trace-collector.hpp"
+
 #include "ns3/core-module.h"  // Include for StringValue, DoubleValue, etc.
+#include "ns3/ndnSIM/model/ndn-app-link-service.hpp"  // Include for AppLinkService
+#include "ns3/ndnSIM/model/null-transport.hpp"  // Include for NullTransport
+#include "ns3/ndnSIM/ndn-cxx/util/span.hpp"  // Include for span support
+#include "ns3/core-module.h"  // Include for StringValue, DoubleValue, etc.
+
+#include <memory>
 
 // Byte order conversion helpers (same as in producer app)
 #ifndef htobe64
@@ -64,28 +71,38 @@ CFNAggregatorApp::SetChildren(const std::vector<std::string>& children) {
 
 void
 CFNAggregatorApp::StartApplication() {
+  // Call base initialization (which creates a face, but we will replace it)
   ndn::App::StartApplication();
+
   if (m_prefix.empty()) {
     NS_LOG_WARN("CFNAggregatorApp has no prefix configured");
     return;
   }
   
-  // Register exact prefix route
-  ndn::FibHelper::AddRoute(GetNode(), m_prefix, m_face, 0);
+  // --- Create producer face ---
+  // This face is used to receive Interests from the parent and send Data upward.
+  auto prodAppLink = std::make_unique<ns3::ndn::AppLinkService>(this);
+  auto prodTransport = std::make_unique<ns3::ndn::NullTransport>("prodFace://", "prodFace://", ::ndn::nfd::FACE_SCOPE_LOCAL);
+  m_prodFace = std::make_shared<ndn::Face>(std::move(prodAppLink), std::move(prodTransport));
+  m_prodFace->setMetric(1);
+  // Add producer face to the NDN stack.
+  GetNode()->GetObject<ndn::L3Protocol>()->addFace(m_prodFace);
+  // Register the aggregator's prefix on the producer face.
+  ndn::FibHelper::AddRoute(GetNode(), m_prefix, m_prodFace, 0);
   std::cout << "Aggregator " << Names::FindName(GetNode())
             << ": added FIB route for exact prefix " << m_prefix 
-            << " via local face " << m_face->getId() << std::endl;
-            
-  // Register wildcard route - CRITICAL PART
-  ndn::Name wildcardName(m_prefix);
-  wildcardName.append(ndn::name::Component::fromEscapedString("*"));
-  ndn::FibHelper::AddRoute(GetNode(), wildcardName, m_face, 1);
+            << " via producer face " << m_prodFace->getId() << std::endl;
+
+  // --- Create consumer face ---
+  // This face is used exclusively to send interests to children.
+  auto consAppLink = std::make_unique<ns3::ndn::AppLinkService>(this);
+  auto consTransport = std::make_unique<ns3::ndn::NullTransport>("consFace://", "consFace://", ::ndn::nfd::FACE_SCOPE_LOCAL);
+  m_consFace = std::make_shared<ndn::Face>(std::move(consAppLink), std::move(consTransport));
+  m_consFace->setMetric(1);
+  // Add consumer face to the NDN stack.
+  GetNode()->GetObject<ndn::L3Protocol>()->addFace(m_consFace);
   
-  std::cout << "Aggregator " << Names::FindName(GetNode())
-            << ": CRITICAL - Explicitly added interest filters for " 
-            << m_prefix << " and " << wildcardName << std::endl;
-  
-  // Initialize random nonce generator
+  // Initialize random nonce generator etc.
   m_rand = CreateObject<UniformRandomVariable>();
   NS_LOG_INFO("CFNAggregatorApp started on node " << Names::FindName(GetNode())
               << " [prefix=" << m_prefix << ", children=" << m_children.size() << "]");
@@ -147,7 +164,8 @@ CFNAggregatorApp::OnInterest(std::shared_ptr<const ndn::Interest> interest) {
     NS_LOG_INFO("Aggregator forwarding Interest " << childInterest->getName() 
                 << " to child [" << childName << "]");
     m_transmittedInterests(childInterest, this, m_face);
-    m_appLink->onReceiveInterest(*childInterest);
+    // m_appLink->onReceiveInterest(*childInterest);
+    m_consFace->sendInterest(*childInterest); // use consumer face
   }
 
   // Schedule a straggler timeout to finalize this aggregation after ChildTimeout seconds

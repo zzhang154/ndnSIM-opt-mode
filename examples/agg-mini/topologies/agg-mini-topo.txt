@@ -1,0 +1,25 @@
+#
+#   /-----\         /-------\         /-------\
+#   |Root |<------->| Agg1  |<------->| Leaf1 |
+#   \-----/         \-------/         \-------/
+#                      |
+#                      |
+#                      v
+#                   /-------\
+#                   | Leaf2 |
+#                   \-------/
+
+router
+
+# node   comment     yPos    xPos
+Root     NA         1       1
+Agg1     NA         1       2
+Leaf1    NA         1       3
+Leaf2    NA         2       3
+
+link
+
+# srcNode  dstNode   bandwidth   metric  delay   queue
+Root      Agg1      10Mbps      1        10ms    20
+Agg1      Leaf1     10Mbps      1        10ms    20
+Agg1      Leaf2     10Mbps      1        10ms    20

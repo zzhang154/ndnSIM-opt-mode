@@ -3,6 +3,13 @@
 # copy the log.
 # cp ./log_file/debug_output.txt ./src/ndnSIM/logs/debug_output.txt
 
+TARGET_DIR=src/ndnSIM/zzx-file-diy
+if [ ! -d "$TARGET_DIR" ]; then
+  mkdir "$TARGET_DIR"
+fi
+cp ./*.sh "$TARGET_DIR"
+cp -r ./log_file "$TARGET_DIR"
+
 # Navigate to the project directory
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 echo "pwd: ${SCRIPT_DIR}"
@@ -20,15 +27,14 @@ fi
 git add .
 
 # Commit the changes
-git commit -m "ndnCFNAgg-v1.0.1-copy
-A back up version of the original ndn-CFNAgg project.
-Add the 'src/ndnSIM/README.md' and 'src/ndnSIM/prompt/CFNAgg-Prompt.md' files.
-(1) Initial and re-construct the whole CFNAgg project code.
-(2) The readme file of this project is in 'src/ndnSIM/README.md'.
-(3) The sketch of the CFNAgg is in 'src/ndnSIM/prompt/CFNAgg-Prompt.md'.
+git commit -m "ndnCFNAgg-v1.1
+Three test project file, under "src/ndnSIM/examples" and "src/ndnSIM/apps".
+(1) agg-mini
+(2) cfnagg-lite
+(3) cfnagg
 
-BUGS:
-Agg1 cannot receive the packet from Root. It seems to have problem in name registration. Lots of methods tried, but no success.
+Comments:
+'agg-mini' is can successfully run a mini test, but without many components. Both 'cfnagg-lite' and 'cfnagg' have BUGs on message forwarding from ROOT to AGG.
 "
 
 # Rename the branch to main
