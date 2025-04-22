@@ -2,7 +2,7 @@
 #ifndef NDN_ROOT_APP_H
 #define NDN_ROOT_APP_H
 
-#include "../ndn-consumer.hpp"
+#include "../../ndn-consumer.hpp"
 
 namespace ns3 {
 namespace ndn {

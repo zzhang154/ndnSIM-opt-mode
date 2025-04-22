@@ -27,14 +27,16 @@ fi
 git add .
 
 # Commit the changes
-git commit -m "ndnCFNAgg-v1.1
-Three test project file, under "src/ndnSIM/examples" and "src/ndnSIM/apps".
-(1) agg-mini
-(2) cfnagg-lite
-(3) cfnagg
+git commit -m "ndnCFNAgg-v1.2
+Modularize the 'agg-mini' project file further.
+(1) aggregator
+(2) buffer
+(3) common
+(4) leaf
+(5) root
 
 Comments:
-'agg-mini' is can successfully run a mini test, but without many components. Both 'cfnagg-lite' and 'cfnagg' have BUGs on message forwarding from ROOT to AGG.
+Readme file for 'agg-mini' can be found in 'src/ndnSIM/agg-mini/agg-mini.md'.
 "
 
 # Rename the branch to main

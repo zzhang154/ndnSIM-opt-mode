@@ -1,5 +1,7 @@
 #include "LeafApp.hpp"
 #include "ns3/log.h"
+#include "ns3/names.h"      // <<< add
+#include <string>           // <<< add
 
 NS_LOG_COMPONENT_DEFINE("ndn.LeafApp");
 
@@ -30,22 +32,29 @@ LeafApp::StartApplication()
   Producer::StartApplication();
   NameValue prefixValue;
   GetAttribute("Prefix", prefixValue);
-  NS_LOG_INFO("[Node " << GetNode()->GetId() << "] LEAF: Started application serving prefix " << prefixValue.Get());
+
+  std::string nodeName = Names::FindName(GetNode());
+  NS_LOG_INFO("[" << nodeName << "] Started serving prefix " 
+               << prefixValue.Get());
 }
 
 void
 LeafApp::StopApplication()
 {
   Producer::StopApplication();
-  NS_LOG_INFO("[Node " << GetNode()->GetId() << "] LEAF: Stopped application");
+  std::string nodeName = Names::FindName(GetNode());
+  NS_LOG_INFO("[" << nodeName << "] Stopped");
 }
 
 void
 LeafApp::OnInterest(shared_ptr<const Interest> interest)
 {
-  NS_LOG_INFO("[Node " << GetNode()->GetId() << "] LEAF: Received Interest " << interest->getName()
-              << " nonce=" << interest->getNonce()
-              << " lifetime=" << interest->getInterestLifetime().count() << "ms");
+  std::string nodeName = Names::FindName(GetNode());
+  NS_LOG_INFO("[" << nodeName << "] Received Interest " 
+               << interest->getName()
+               << " nonce=" << interest->getNonce()
+               << " lifetime=" << interest->getInterestLifetime().count() 
+               << "ms");
   Producer::OnInterest(interest);
 }
 

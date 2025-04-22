@@ -169,52 +169,62 @@
                  << " sending for " << aggPrefix);
    }
    if (!aggName.empty()) {
-     Ptr<Node> aggNode = Names::Find<Node>(aggName);
-     for (const std::string& leafName : leafNames) {
-       std::string childPrefix = "/app/" + leafName;
-       ns3::ndn::AppHelper aggHelper("ns3::ndn::AggregatorApp");
-       aggHelper.SetPrefix(aggPrefix);
-       aggHelper.SetAttribute("ChildPrefix", StringValue(childPrefix));
-       aggHelper.Install(aggNode).Start(Seconds(0.0));
-       NS_LOG_INFO("Installed AggregatorApp on " << aggName
-                   << " for " << aggPrefix << " → " << childPrefix);
-     }
-   }
-   for (const std::string& leafName : leafNames) {
-     Ptr<Node> leafNode = Names::Find<Node>(leafName);
-     std::string childPrefix = "/app/" + leafName;
-     ns3::ndn::AppHelper leafHelper("ns3::ndn::LeafApp");
-     leafHelper.SetPrefix(childPrefix);
-     leafHelper.Install(leafNode).Start(Seconds(0.0));
-     NS_LOG_INFO("Installed LeafApp on " << leafName
-                 << " listening for " << childPrefix);
-   }
- 
-   // --- 8) Set up global routing origins ---
-   ns3::ndn::GlobalRoutingHelper globalRouting;
-   globalRouting.InstallAll();
-   if (!aggName.empty()) {
-     Ptr<Node> aggNode = Names::Find<Node>(aggName);
-     globalRouting.AddOrigins(aggPrefix, aggNode);
-     NS_LOG_INFO("GlobalRouting: Added origin " << aggPrefix
-                 << " at " << aggName);
-   }
-   for (const std::string& leafName : leafNames) {
-     Ptr<Node> leafNode = Names::Find<Node>(leafName);
-     std::string childPrefix = "/app/" + leafName;
-     globalRouting.AddOrigins(childPrefix, leafNode);
-     NS_LOG_INFO("GlobalRouting: Added origin " << childPrefix
-                 << " at " << leafName);
-   }
-   ns3::ndn::GlobalRoutingHelper::CalculateRoutes();
-   NS_LOG_INFO("Calculated global routes.");
- 
-   // --- 9) Run simulation ---
-   NS_LOG_INFO("Starting simulation for 10 seconds.");
-   Simulator::Stop(Seconds(10.0));
-   Simulator::Run();
-   Simulator::Destroy();
-   NS_LOG_INFO("Simulation finished.");
- 
-   return 0;
+    Ptr<Node> aggNode = Names::Find<Node>(aggName);
+    if (!aggNode) {
+      throw std::runtime_error("Aggregator node '" + aggName + "' not found");
+    }
+    ns3::ndn::AppHelper aggHelper("ns3::ndn::AggregatorApp");
+    aggHelper.SetPrefix(aggPrefix);
+  
+    // ← ADD these lines right here ↓
+    std::ostringstream oss;
+    for (auto const& leafName : leafNames) {
+      oss << "/app/" << leafName << " ";
+    }
+    aggHelper.SetAttribute("ChildPrefixes", StringValue(oss.str()));
+    aggHelper.Install(aggNode).Start(Seconds(0.0));
+    // ← ADD up to here ↑
+  
+    NS_LOG_INFO("Installed AggregatorApp on " << aggName
+                << " for " << aggPrefix
+                << " → children " << oss.str());
+  }
+  
+  for (const std::string& leafName : leafNames) {
+    Ptr<Node> leafNode = Names::Find<Node>(leafName);
+    std::string childPrefix = "/app/" + leafName;
+    ns3::ndn::AppHelper leafHelper("ns3::ndn::LeafApp");
+    leafHelper.SetPrefix(childPrefix);
+    leafHelper.Install(leafNode).Start(Seconds(0.0));
+    NS_LOG_INFO("Installed LeafApp on " << leafName
+                << " listening for " << childPrefix);
+  }
+
+  // --- 8) Set up global routing origins ---
+  ns3::ndn::GlobalRoutingHelper globalRouting;
+  globalRouting.InstallAll();
+  if (!aggName.empty()) {
+    Ptr<Node> aggNode = Names::Find<Node>(aggName);
+    globalRouting.AddOrigins(aggPrefix, aggNode);
+    NS_LOG_INFO("GlobalRouting: Added origin " << aggPrefix
+                << " at " << aggName);
+  }
+  for (const std::string& leafName : leafNames) {
+    Ptr<Node> leafNode = Names::Find<Node>(leafName);
+    std::string childPrefix = "/app/" + leafName;
+    globalRouting.AddOrigins(childPrefix, leafNode);
+    NS_LOG_INFO("GlobalRouting: Added origin " << childPrefix
+                << " at " << leafName);
+  }
+  ns3::ndn::GlobalRoutingHelper::CalculateRoutes();
+  NS_LOG_INFO("Calculated global routes.");
+
+  // --- 9) Run simulation ---
+  NS_LOG_INFO("Starting simulation for 10 seconds.");
+  Simulator::Stop(Seconds(10.0));
+  Simulator::Run();
+  Simulator::Destroy();
+  NS_LOG_INFO("Simulation finished.");
+
+  return 0;
  }

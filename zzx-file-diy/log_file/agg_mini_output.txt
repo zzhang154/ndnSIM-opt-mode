@@ -1,9 +1,42 @@
 Waf: Entering directory `/home/dd/ndnSIM-2.9-official/ndnSIM-2.9-official/build'
-[2922/3316] Compiling src/ndnSIM/examples/agg-mini/agg-mini-simulation.cpp
-[3276/3316] Linking build/src/ndnSIM/examples/agg-mini/ns3.35-agg-mini-debug
+[1090/3322] Compiling install-ns3-header: ns3/ndnSIM/apps/agg-mini/aggregator/AggregatorApp.hpp
+[2357/3322] Compiling src/ndnSIM/apps/agg-mini/aggregator/AggregatorApp.cpp
+[2791/3322] Linking build/lib/libns3.35-ndnSIM-debug.so
+[3251/3322] Linking build/src/ndnSIM/examples/ns3.35-lfid-debug
+[3252/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-congestion-alt-topo-plugin-debug
+[3253/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-congestion-topo-plugin-debug
+[3254/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-csma-debug
+[3255/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-custom-apps-debug
+[3256/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-cxx-simple-debug
+[3257/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-different-strategy-per-prefix-debug
+[3258/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-grid-multiple-strategies-debug
+[3259/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-grid-topo-plugin-loss-debug
+[3260/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-grid-topo-plugin-red-queues-debug
+[3261/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-grid-topo-plugin-debug
+[3262/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-grid-debug
+[3263/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-load-balancer-debug
+[3264/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-simple-for-nrt-helper-debug
+[3265/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-simple-wifi-debug
+[3266/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-simple-with-content-freshness-debug
+[3267/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-simple-with-link-failure-debug
+[3268/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-simple-with-pcap-debug
+[3269/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-simple-debug
+[3270/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-tree-app-delay-tracer-debug
+[3271/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-tree-cs-tracers-debug
+[3272/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-tree-tracers-debug
+[3273/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-tree-with-l2tracer-debug
+[3274/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-triangle-calculate-routes-debug
+[3275/3322] Linking build/src/ndnSIM/examples/ns3.35-ndn-zipf-mandelbrot-debug
+[3276/3322] Linking build/src/ndnSIM/examples/cfnagg/ns3.35-cfnagg-simulation-debug
+[3277/3322] Linking build/src/ndnSIM/examples/cfnagg-lite/ns3.35-cfnagg-lite-simulation-debug
+[3278/3322] Linking build/src/ndnSIM/examples/agg-mini/ns3.35-agg-mini-debug
+[3279/3322] Linking build/scratch/scratch-simulator
+[3280/3322] Linking build/scratch/subdir/subdir
+[3281/3322] Linking build/utils/ns3.35-test-runner-debug
+[3282/3322] Linking build/utils/ns3.35-print-introspected-doxygen-debug
 Waf: Leaving directory `/home/dd/ndnSIM-2.9-official/ndnSIM-2.9-official/build'
 Build commands will be stored in build/compile_commands.json
-'build' finished successfully (7.244s)
+'build' finished successfully (19.152s)
 GNU gdb (Ubuntu 12.1-0ubuntu1~22.04.2) 12.1
 Copyright (C) 2022 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
@@ -38,7 +71,7 @@ FIB: Added route on Root for /app/agg via Agg1
 FIB: Added route on Agg1 for /app/Leaf1 via Leaf1
 FIB: Added route on Agg1 for /app/Leaf2 via Leaf2
 Installed RootApp on Root sending for /app/agg
-Installed AggregatorApp on Agg1 for /app/agg → /app/Leaf1
+Installed AggregatorApp on Agg1 for /app/agg → children /app/Leaf1 /app/Leaf2 
 [Node 0] ROOT: Sending Interest for /app/agg/seq=0
 [Node 0] ROOT: Sending Interest for /app/agg/seq=1
 [Node 0] ROOT: Sending Interest for /app/agg/seq=2
@@ -46,43 +79,44 @@ Installed AggregatorApp on Agg1 for /app/agg → /app/Leaf1
 [Node 0] ROOT: Scheduled next packet, sequence 3/3 after 1s
 [Node 0] ROOT: Scheduled next packet, sequence 3/3 after 1s
 [Node 0] ROOT: Scheduled next packet, sequence 3/3 after 1s
-Installed AggregatorApp on Agg1 for /app/agg → /app/Leaf2
-[Node 1] AGG: Started application serving prefix /app/agg, child prefix /app/Leaf1
 Installed LeafApp on Leaf1 listening for /app/Leaf1
-[Node 1] AGG: Started application serving prefix /app/agg, child prefix /app/Leaf2
+[Agg1] Serving /app/agg → children={/app/Leaf1 /app/Leaf2 }
 Installed LeafApp on Leaf2 listening for /app/Leaf2
 GlobalRouting: Added origin /app/agg at Agg1
 GlobalRouting: Added origin /app/Leaf1 at Leaf1
 GlobalRouting: Added origin /app/Leaf2 at Leaf2
 Calculated global routes.
 Starting simulation for 10 seconds.
-[Node 2] LEAF: Started application serving prefix /app/Leaf1
-[Node 3] LEAF: Started application serving prefix /app/Leaf2
-[Node 1] AGG: Received Interest /app/agg/seq=0 from nonce=f1a35472 lifetime=2000ms
-[Node 1] AGG: Interest suffix extraction: /seq=0
-[Node 1] AGG: Forwarding Interest downstream: /app/Leaf1/seq=0 (transformed from /app/agg/seq=0)
-[Node 1] AGG: Received Interest /app/agg/seq=1 from nonce=b3376e25 lifetime=2000ms
-[Node 1] AGG: Interest suffix extraction: /seq=1
-[Node 1] AGG: Forwarding Interest downstream: /app/Leaf1/seq=1 (transformed from /app/agg/seq=1)
-[Node 1] AGG: Received Interest /app/agg/seq=2 from nonce=d5d84c0b lifetime=2000ms
-[Node 1] AGG: Interest suffix extraction: /seq=2
-[Node 1] AGG: Forwarding Interest downstream: /app/Leaf1/seq=2 (transformed from /app/agg/seq=2)
-[Node 2] LEAF: Received Interest /app/Leaf1/seq=0 nonce=f1a35472 lifetime=2000ms
-[Node 2] LEAF: Received Interest /app/Leaf1/seq=1 nonce=b3376e25 lifetime=2000ms
-[Node 2] LEAF: Received Interest /app/Leaf1/seq=2 nonce=d5d84c0b lifetime=2000ms
-[Node 1] AGG: Received Data from downstream: /app/Leaf1/seq=0
-[Node 1] AGG: Data suffix extraction: /seq=0
-[Node 1] AGG: Forwarding Data upstream: /app/agg/seq=0 (transformed from /app/Leaf1/seq=0) content size: 1024 bytes freshness: 0ms
-[Node 1] AGG: Received Data from downstream: /app/Leaf1/seq=1
-[Node 1] AGG: Data suffix extraction: /seq=1
-[Node 1] AGG: Forwarding Data upstream: /app/agg/seq=1 (transformed from /app/Leaf1/seq=1) content size: 1024 bytes freshness: 0ms
-[Node 1] AGG: Received Data from downstream: /app/Leaf1/seq=2
-[Node 1] AGG: Data suffix extraction: /seq=2
-[Node 1] AGG: Forwarding Data upstream: /app/agg/seq=2 (transformed from /app/Leaf1/seq=2) content size: 1024 bytes freshness: 0ms
+[Leaf1] Started serving prefix /app/Leaf1
+[Leaf2] Started serving prefix /app/Leaf2
+[Agg1] RX Interest /app/agg/seq=0
+[Agg1] FWD to /app/Leaf1/seq=0
+[Agg1] FWD to /app/Leaf2/seq=0
+[Agg1] RX Interest /app/agg/seq=1
+[Agg1] FWD to /app/Leaf1/seq=1
+[Agg1] FWD to /app/Leaf2/seq=1
+[Agg1] RX Interest /app/agg/seq=2
+[Agg1] FWD to /app/Leaf1/seq=2
+[Agg1] FWD to /app/Leaf2/seq=2
+[Leaf1] Received Interest /app/Leaf1/seq=0 nonce=f1a35472 lifetime=2000ms
+[Leaf2] Received Interest /app/Leaf2/seq=0 nonce=f1a35472 lifetime=2000ms
+[Leaf1] Received Interest /app/Leaf1/seq=1 nonce=b3376e25 lifetime=2000ms
+[Leaf2] Received Interest /app/Leaf2/seq=1 nonce=b3376e25 lifetime=2000ms
+[Leaf1] Received Interest /app/Leaf1/seq=2 nonce=d5d84c0b lifetime=2000ms
+[Leaf2] Received Interest /app/Leaf2/seq=2 nonce=d5d84c0b lifetime=2000ms
+[Agg1] RX Data /app/Leaf1/seq=0
+[Agg1] RX Data /app/Leaf2/seq=0
+[Agg1] AGG send up /app/agg/seq=0
+[Agg1] RX Data /app/Leaf1/seq=1
+[Agg1] RX Data /app/Leaf2/seq=1
+[Agg1] AGG send up /app/agg/seq=1
+[Agg1] RX Data /app/Leaf1/seq=2
+[Agg1] RX Data /app/Leaf2/seq=2
+[Agg1] AGG send up /app/agg/seq=2
 [Node 0] ROOT: Reached maximum sequence 3, stopping Interest generation
 [Node 0] ROOT: Reached maximum sequence 3, stopping Interest generation
 [Node 0] ROOT: Reached maximum sequence 3, stopping Interest generation
 Simulation finished.
-[Inferior 1 (process 265186) exited normally]
+[Inferior 1 (process 410358) exited normally]
 [Program stopped: printing stack trace]Error while running hook_stop:
 No stack.

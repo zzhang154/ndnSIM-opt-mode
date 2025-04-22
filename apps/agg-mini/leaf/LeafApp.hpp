@@ -2,7 +2,7 @@
 #ifndef NDN_LEAF_APP_H
 #define NDN_LEAF_APP_H
 
-#include "../ndn-producer.hpp"
+#include "../../ndn-producer.hpp"
 
 namespace ns3 {
 namespace ndn {
