@@ -34,6 +34,13 @@
  int
  main(int argc, char* argv[])
  {
+   // Enable logging for specific components
+   LogComponentEnable("agg-mini-simulation", LOG_LEVEL_ALL);
+   LogComponentEnable("ndn.RootApp", LOG_LEVEL_ALL);
+   LogComponentEnable("ndn.LeafApp", LOG_LEVEL_ALL);
+   LogComponentEnable("ndn.AggregatorApp", LOG_LEVEL_ALL);
+   // ns3::LogComponentEnable ("ndn.AggBufferManager", ns3::LOG_LEVEL_ALL);
+
    CommandLine cmd;
    std::string baseDir = "src/ndnSIM/examples/agg-mini/";
    cmd.AddValue("baseDir", "Base directory for simulation files", baseDir);

@@ -59,8 +59,16 @@ AggregatorApp::AggregatorApp()
 void
 AggregatorApp::StartApplication()
 {
-  App::StartApplication();
+  App::StartApplication();  // This should initialize m_face and m_appLink
+
+  // Verify that initialization worked
+  if (!m_face || !m_appLink) {
+    NS_LOG_ERROR("[" << Names::FindName(GetNode()) << "] Face or AppLink not initialized properly");
+    return;
+  }
+
   FibHelper::AddRoute(GetNode(), m_downPrefix, m_face, 0);
+
   std::istringstream iss(m_childPrefixesRaw);
   std::string token;
   while (iss >> token) {
@@ -109,7 +117,13 @@ AggregatorApp::OnInterest(std::shared_ptr<const Interest> interest)
 
     NS_LOG_INFO("[" << nodeName << "] FWD to " << childName);
     m_transmittedInterests(childInterest, this, m_face);
-    m_appLink->onReceiveInterest(*childInterest);
+
+    // to this (add a null check):
+    if (m_appLink) {
+      m_appLink->onReceiveInterest(*childInterest);
+    } else {
+      NS_LOG_ERROR("[" << Names::FindName(GetNode()) << "] m_appLink is null when sending interest to " << childName);
+    }
   }
 }
 
@@ -158,7 +172,12 @@ AggregatorApp::OnData(std::shared_ptr<const Data> data)
 
     NS_LOG_INFO("[" << nodeName << "] AGG send up " << upName);
     m_transmittedDatas(aggData, this, m_face);
-    m_appLink->onReceiveData(*aggData);
+
+    if (m_appLink) {
+      m_appLink->onReceiveData(*aggData);
+    } else {
+      NS_LOG_ERROR("[" << Names::FindName(GetNode()) << "] m_appLink is null when sending data to " << upName);
+    }
 
     m_bufferMgr.Remove(seq);
   }
