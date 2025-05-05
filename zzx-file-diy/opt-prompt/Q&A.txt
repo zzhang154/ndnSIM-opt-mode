@@ -1,0 +1,40 @@
+Thanks for the detailed context and uploads. To pinpoint the exact issue causing the segmentation fault in optimized mode, I need to know:
+
+Have you observed whether the bug occurs consistently for a specific sequence number or event (e.g. timeout, receiving a specific Data packet)?
+
+Could you share whether the issue happens during aggregation completion or during the straggler timeout path?
+
+Are you using any custom strategy, or just relying on the default BestRoute strategy throughout?
+
+Once I have this, I’ll walk through the exact line and patch to fix the root cause.
+
+
+
+1. Under the optimized mode, the "agg-mini-simulation.cpp" cannot even run. However, it can successfully run and output log under the -d debug mode.
+
+2. All the message is provided in the "Program received signal SIGSEGV, Segmentation fault." I mention above. 
+Under the -d debug mode, the programe can run normally as:
+Use 'set logging enabled on'.
+
+warning: Currently logging to gdb.txt.  Turn the logging off and on to make the new setting effective.
+SIGINT is used by the debugger.
+Are you sure you want to change it? (y or n) [answered Y; input not from terminal]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Loaded topology from: src/ndnSIM/examples/agg-mini/topologies/agg-mini-topo.txt
+Parsing tree structure from: src/ndnSIM/examples/agg-mini/topologies/tree.txt
+Parsed link: Root -> Agg1
+Parsed link: Agg1 -> Leaf1
+Parsed link: Agg1 -> Leaf2
+Identified Aggregator: Agg1
+Identified Leaf: Leaf1
+Identified Leaf: Leaf2
+Identified Root: Root
+FIB: Added route on Root for /app/agg via Agg1
+FIB: Added route on Agg1 for /app/Leaf1 via Leaf1
+
+3. No, I just use "   // --- 5) Install Strategy ---
+   ns3::ndn::StrategyChoiceHelper::InstallAll(
+     "/", "/localhost/nfd/strategy/best-route");" in the main function.
+
+It is to kindly remind you that my project is built on ndnSIM-2.9, and I only have my customized file as provided above. Other files are remained unchanged. If you really want to check other files in ndnSIM-2.9, please refer to "https://github.com/named-data-ndnSIM/ndnSIM" to check the git repo.

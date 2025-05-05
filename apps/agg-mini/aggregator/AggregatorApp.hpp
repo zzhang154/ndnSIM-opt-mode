@@ -19,6 +19,7 @@ class AggregatorApp : public App {
 public:
   static TypeId GetTypeId();
   AggregatorApp();
+  virtual ~AggregatorApp(); // <<< Add this declaration
 
 protected:
   virtual void StartApplication() override;

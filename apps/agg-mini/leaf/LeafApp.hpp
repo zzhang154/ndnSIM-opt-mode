@@ -14,6 +14,7 @@ class LeafApp : public Producer {
   public:
     static TypeId GetTypeId();
     LeafApp();
+    virtual ~LeafApp(); // <<< Add this declaration
   
   protected:
     virtual void StartApplication() override;

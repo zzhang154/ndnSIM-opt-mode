@@ -14,10 +14,17 @@ class RootApp : public Consumer {
 public:
   static TypeId GetTypeId();
   RootApp();
+  virtual ~RootApp(); // <<< Add this declaration
 
   // Add MaxSeq accessors
   uint32_t GetMaxSeq() const;
   void SetMaxSeq(uint32_t maxSeq);
+
+  // <<< Add these missing declarations >>>
+  virtual void StartApplication() override;
+  virtual void StopApplication() override;
+  virtual void OnData(std::shared_ptr<const Data> data) override;
+  // <<< End of added declarations >>>
 
   // Override in the public section to match Consumer class
   virtual void SendPacket();  // Removed 'override' keyword since base method isn't virtual
