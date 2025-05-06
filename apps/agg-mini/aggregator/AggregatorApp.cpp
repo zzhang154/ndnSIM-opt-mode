@@ -109,6 +109,10 @@ AggregatorApp::StartApplication()
 void
 AggregatorApp::OnInterest(std::shared_ptr<const Interest> interest)
 {
+  if (!m_face) {
+    std::cerr << "[" << Names::FindName(GetNode()) << "] AggregatorApp: ERROR - m_face is null in OnInterest!" << std::endl;
+    return;
+  }
   App::OnInterest(interest); // Call base class first
   std::string nodeName = Names::FindName(GetNode());
   if (!m_active) {
@@ -147,6 +151,8 @@ AggregatorApp::OnInterest(std::shared_ptr<const Interest> interest)
 
     // Send the interest using the AppLink/Face
     if (m_appLink) {
+      childInterest->wireEncode();                       // new – build wire
+      m_transmittedInterests(childInterest, this, m_face); // optional trace
       m_appLink->onReceiveInterest(*childInterest); // Send Interest downstream
     } else {
       std::cerr << "[" << nodeName << "] AggregatorApp: ERROR - m_appLink is null when sending interest to " << childName << std::endl;
@@ -157,6 +163,10 @@ AggregatorApp::OnInterest(std::shared_ptr<const Interest> interest)
 void
 AggregatorApp::OnData(std::shared_ptr<const Data> data)
 {
+  if (!m_face) {
+    std::cerr << "[" << Names::FindName(GetNode()) << "] AggregatorApp: ERROR - m_face is null in OnInterest!" << std::endl;
+    return;
+  }
   App::OnData(data); // Call base class first
   std::string nodeName = Names::FindName(GetNode());
    if (!m_active) {
@@ -210,11 +220,13 @@ AggregatorApp::OnData(std::shared_ptr<const Data> data)
     aggData->setContent(reinterpret_cast<const uint8_t*>(&sum), sizeof(sum));
 
     ns3::ndn::common::SetDummySignature(aggData); // Using common utils is fine
-    aggData->wireEncode(); // Ensure wire format is ready
+    // aggData->wireEncode(); // Ensure wire format is ready
 
     std::cout << "[" << nodeName << "] AggregatorApp: AGG send up " << upName << std::endl;
 
     if (m_appLink) {
+      aggData->wireEncode();                             // new
+      m_transmittedDatas(aggData, this, m_face);         // optional trace
       m_appLink->onReceiveData(*aggData); // Correct way to send Data up
     } else {
       std::cerr << "[" << nodeName << "] AggregatorApp: ERROR - m_appLink is null when sending data up for " << upName << std::endl;
@@ -227,6 +239,10 @@ AggregatorApp::OnData(std::shared_ptr<const Data> data)
 void
 AggregatorApp::OnStragglerTimeout(uint32_t seq)
 {
+  if (!m_face) {
+    std::cerr << "[" << Names::FindName(GetNode()) << "] AggregatorApp: ERROR - m_face is null in OnInterest!" << std::endl;
+    return;
+  }
   std::string nodeName = Names::FindName(GetNode());
   std::cout << "[" << nodeName << "] AggregatorApp: Straggler timeout triggered for seq=" << seq << std::endl;
 
@@ -254,14 +270,16 @@ AggregatorApp::OnStragglerTimeout(uint32_t seq)
   aggData->setContent(reinterpret_cast<const uint8_t*>(&sum), sizeof(sum));
 
   ns3::ndn::common::SetDummySignature(aggData);
-  aggData->wireEncode(); // Ensure wire format is ready
+  // aggData->wireEncode(); // Ensure wire format is ready
 
   std::cout << "[" << nodeName << "] AggregatorApp: Timeout-AGG send up " << upName
                << " (Received " << buf->GetReceivedCount() << "/" << buf->GetExpectedCount() << ")" << std::endl;
 
   // Send Data up via AppLink
   if (m_appLink) {
-     m_appLink->onReceiveData(*aggData);
+    aggData->wireEncode();                             // new
+    m_transmittedDatas(aggData, this, m_face);         // optional trace
+    m_appLink->onReceiveData(*aggData);
   } else {
      std::cerr << "[" << nodeName << "] AggregatorApp: ERROR - m_appLink is null during timeout handling for " << upName << std::endl;
   }

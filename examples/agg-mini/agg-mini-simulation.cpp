@@ -178,62 +178,63 @@
      "/", "/localhost/nfd/strategy/best-route"); // Use default BestRoute strategy
    std::cout << "agg-mini-simulation: Installed BestRoute strategy on all nodes." << std::endl;
 
-   // --- 7) Install custom apps based on roles ---
-   if (!rootName.empty()) {
-     Ptr<Node> rootNode = Names::Find<Node>(rootName);
-     if (!rootNode) {
-       std::cerr << "agg-mini-simulation: ERROR - Root node '" + rootName + "' not found in topology" << std::endl;
-       return 1; // Use return instead of throw for cleaner exit in main
-     }
-     ns3::ndn::AppHelper rootHelper("ns3::ndn::RootApp");
-     rootHelper.SetPrefix(aggPrefix);
-     rootHelper.SetAttribute("MaxSeq", UintegerValue(3)); // Example: send 3 sequences
-     rootHelper.SetAttribute("Interval", DoubleValue(1.0)); // Send every 1 second
-     rootHelper.Install(rootNode).Start(Seconds(0.0));
-     std::cout << "agg-mini-simulation: Installed RootApp on " << rootName
-                 << " sending for " << aggPrefix << std::endl;
-   }
-   if (!aggName.empty()) {
-    Ptr<Node> aggNode = Names::Find<Node>(aggName);
-    if (!aggNode) {
-      std::cerr << "agg-mini-simulation: ERROR - Aggregator node '" + aggName + "' not found" << std::endl;
-      return 1;
-    }
-    ns3::ndn::AppHelper aggHelper("ns3::ndn::AggregatorApp");
-    aggHelper.SetPrefix(aggPrefix); // Listens for upstream interests
+    // --- 7) Install custom apps based on roles ---
 
-    // Construct ChildPrefixes attribute string
-    std::ostringstream oss;
-    bool first = true;
-    for (auto const& leafName : leafNames) {
-        if (!first) oss << " ";
-        oss << "/app/" << leafName; // Assuming prefix matches leaf name
-        first = false;
-    }
-    aggHelper.SetAttribute("ChildPrefixes", StringValue(oss.str()));
-    // Set other AggregatorApp attributes if needed (BufferCapacity, StragglerTimeout use defaults)
-    aggHelper.Install(aggNode).Start(Seconds(0.0));
-
-    std::cout << "agg-mini-simulation: Installed AggregatorApp on " << aggName
+    // Install AggregatorApp first
+    if (!aggName.empty()) {
+      Ptr<Node> aggNode = Names::Find<Node>(aggName);
+      if (!aggNode) {
+        std::cerr << "agg-mini-simulation: ERROR - Aggregator node '" + aggName + "' not found" << std::endl;
+        return 1;
+      }
+      ns3::ndn::AppHelper aggHelper("ns3::ndn::AggregatorApp");
+      aggHelper.SetPrefix(aggPrefix); // Listens for upstream interests
+      // Construct ChildPrefixes attribute string
+      std::ostringstream oss;
+      bool first = true;
+      for (auto const& leafName : leafNames) {
+          if (!first) oss << " ";
+          oss << "/app/" << leafName; // Assuming prefix matches leaf name
+          first = false;
+      }
+      aggHelper.SetAttribute("ChildPrefixes", StringValue(oss.str()));
+      aggHelper.Install(aggNode).Start(Seconds(0.0));
+      std::cout << "agg-mini-simulation: Installed AggregatorApp on " << aggName
                 << " for " << aggPrefix
                 << " -> children {" << oss.str() << "}" << std::endl;
-  }
+    }
 
-  for (const std::string& leafName : leafNames) {
-    Ptr<Node> leafNode = Names::Find<Node>(leafName);
-     if (!leafNode) {
-       std::cerr << "agg-mini-simulation: ERROR - Leaf node '" + leafName + "' not found" << std::endl;
-       // Continue installing on other leaves if possible, or return 1
-       continue;
-     }
-    std::string childPrefix = "/app/" + leafName; // Assuming prefix matches leaf name
-    ns3::ndn::AppHelper leafHelper("ns3::ndn::LeafApp");
-    leafHelper.SetPrefix(childPrefix); // Producer listens on this prefix
-    // Set LeafApp attributes if any (none in this simple version)
-    leafHelper.Install(leafNode).Start(Seconds(0.0));
-    std::cout << "agg-mini-simulation: Installed LeafApp on " << leafName
+    // Install LeafApps next
+    for (const std::string& leafName : leafNames) {
+      Ptr<Node> leafNode = Names::Find<Node>(leafName);
+      if (!leafNode) {
+        std::cerr << "agg-mini-simulation: ERROR - Leaf node '" + leafName + "' not found" << std::endl;
+        continue;
+      }
+      std::string childPrefix = "/app/" + leafName;
+      ns3::ndn::AppHelper leafHelper("ns3::ndn::LeafApp");
+      leafHelper.SetPrefix(childPrefix);
+      leafHelper.Install(leafNode).Start(Seconds(0.0));
+      std::cout << "agg-mini-simulation: Installed LeafApp on " << leafName
                 << " listening for " << childPrefix << std::endl;
-  }
+    }
+
+    // Install RootApp last, with a delay
+    if (!rootName.empty()) {
+      Ptr<Node> rootNode = Names::Find<Node>(rootName);
+      if (!rootNode) {
+        std::cerr << "agg-mini-simulation: ERROR - Root node '" + rootName + "' not found in topology" << std::endl;
+        return 1;
+      }
+      ns3::ndn::AppHelper rootHelper("ns3::ndn::RootApp");
+      rootHelper.SetPrefix(aggPrefix);
+      rootHelper.SetAttribute("MaxSeq", UintegerValue(3));
+      rootHelper.SetAttribute("Interval", DoubleValue(1.0));
+      // DELAYED START
+      rootHelper.Install(rootNode).Start(Seconds(0.1));
+      std::cout << "agg-mini-simulation: Installed RootApp on " << rootName
+                << " sending for " << aggPrefix << std::endl;
+    }
 
   // --- 8) Set up global routing origins ---
   // This calculates and installs routes across the whole topology

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- EDIT THIS LINE BEFORE RUNNING ---
-COMMIT_MESSAGE="Opt-debug-v1.0: change log from ns3 log to std::cout."
+COMMIT_MESSAGE="Opt-debug-v1.1: successfully locate the bug in optimized mode, which is in the 'ndnSIM-opt-test/src/ndnSIM/NFD/daemon/fw/strategy.cpp', in the 'Strategy::sendData' function."
 # ------------------------------------
 
 # Navigate to the script's directory (optional, but safer if run from elsewhere)

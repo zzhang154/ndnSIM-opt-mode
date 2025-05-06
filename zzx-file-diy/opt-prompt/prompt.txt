@@ -82,6 +82,54 @@ apps/agg-mini/
 *   The simulation is likely run via `./waf --run agg-mini-simulation` (or similar, depending on the exact example name in `wscript`).
 
 Log file:
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+agg-mini-simulation: Starting main function.
+agg-mini-simulation: Using baseDir=src/ndnSIM/examples/agg-mini/, topoPath=src/ndnSIM/examples/agg-mini/topologies/agg-mini-topo.txt, treePath=src/ndnSIM/examples/agg-mini/topologies/tree.txt
+agg-mini-simulation: Loaded topology from: src/ndnSIM/examples/agg-mini/topologies/agg-mini-topo.txt
+agg-mini-simulation: Parsing tree structure from: src/ndnSIM/examples/agg-mini/topologies/tree.txt
+agg-mini-simulation: Finished parsing tree file. Found 4 unique nodes.
+agg-mini-simulation: Identified Aggregator: Agg1
+agg-mini-simulation: Identified Leaf: Leaf1
+agg-mini-simulation: Identified Leaf: Leaf2
+agg-mini-simulation: Identified Root: Root
+agg-mini-simulation: Installed NDN stack on all nodes.
+agg-mini-simulation: FIB - Added route on Root for /app/agg via Agg1
+agg-mini-simulation: FIB - Added route on Agg1 for /app/Leaf1 via Leaf1
+agg-mini-simulation: FIB - Added route on Agg1 for /app/Leaf2 via Leaf2
+agg-mini-simulation: Installed BestRoute strategy on all nodes.
+RootApp: Constructor called.
+RootApp: MaxSeq set to 3
+agg-mini-simulation: Installed RootApp on Root sending for /app/agg
+AggBufferManager: Initialized with capacity=0, timeout=0s
+AggregatorApp: Constructor called.
+agg-mini-simulation: Installed AggregatorApp on Agg1 for /app/agg -> children {/app/Leaf1 /app/Leaf2}
+[Root] RootApp: Sending Interest for /app/agg/seq=0
+[Root] RootApp: Sending Interest for /app/agg/seq=1
+[Root] RootApp: Sending Interest for /app/agg/seq=2
+[Root] RootApp: Reached maximum sequence 3, stopping Interest generation.
+[Root] RootApp: Scheduling next packet (seq=4/3) after 1s.
+[Root] RootApp: Scheduling next packet (seq=4/3) after 1s.
+[Root] RootApp: Scheduling next packet (seq=4/3) after 1s.
+[Root] RootApp: StartApplication called. Sending Interests for prefix /app/agg up to seq=3 every 1s.
+LeafApp: Constructor called.
+agg-mini-simulation: Installed LeafApp on Leaf1 listening for /app/Leaf1
+[Agg1] AggregatorApp: StartApplication called.
+[Agg1] AggregatorApp: Face and AppLink initialized.
+[Agg1] AggregatorApp: Added FIB route for /app/agg via AppFace.
+AggBufferManager: Initialized with capacity=100, timeout=1s
+[Agg1] AggregatorApp: BufferManager re-initialized with capacity=100, timeout=1s
+[Agg1] AggregatorApp: Serving /app/agg -> children={/app/Leaf1 /app/Leaf2}
+LeafApp: Constructor called.
+agg-mini-simulation: Installed LeafApp on Leaf2 listening for /app/Leaf2
+agg-mini-simulation: GlobalRouting - Added origin /app/agg at Agg1
+agg-mini-simulation: GlobalRouting - Added origin /app/Leaf1 at Leaf1
+agg-mini-simulation: GlobalRouting - Added origin /app/Leaf2 at Leaf2
+agg-mini-simulation: Calculated and installed global routes.
+agg-mini-simulation: Starting simulation for 10 seconds.
+[Leaf1] LeafApp: StartApplication called. Serving prefix /app/Leaf1
+[Leaf2] LeafApp: StartApplication called. Serving prefix /app/Leaf2
+
 Program received signal SIGSEGV, Segmentation fault.
 [Program stopped, printing backtrace]
 #0  __gnu_cxx::__exchange_and_add_dispatch (__val=-1, __mem=0x8) at /usr/include/c++/11/ext/atomicity.h:99
@@ -89,32 +137,31 @@ Program received signal SIGSEGV, Segmentation fault.
 #2  std::__shared_count<(__gnu_cxx::_Lock_policy)2>::~__shared_count (this=<synthetic pointer>, __in_chrg=<optimized out>) at /usr/include/c++/11/bits/shared_ptr_base.h:705
 #3  std::__shared_ptr<ndn::lp::PitToken, (__gnu_cxx::_Lock_policy)2>::~__shared_ptr (this=<synthetic pointer>, __in_chrg=<optimized out>) at /usr/include/c++/11/bits/shared_ptr_base.h:1154
 #4  std::shared_ptr<ndn::lp::PitToken>::~shared_ptr (this=<synthetic pointer>, __in_chrg=<optimized out>) at /usr/include/c++/11/bits/shared_ptr.h:122
-#5  nfd::fw::Strategy::sendData (this=0x55555572f0e0, data=..., egress=..., pitEntry=std::shared_ptr<nfd::pit::Entry> (use count 5, weak count 0) = {...}) at ../src/ndnSIM/NFD/daemon/fw/strategy.cpp:276
-#6  0x00007ffff7dd491e in operator() (d=..., i=..., __closure=0x7fffffffcae0) at ../src/ndnSIM/NFD/daemon/fw/forwarder.cpp:162
-#7  nfd::cs::Cs::find<nfd::Forwarder::onIncomingInterest(const ndn::Interest&, const nfd::FaceEndpoint&)::<lambda(const ndn::Interest&, const ndn::Data&)>, nfd::Forwarder::onIncomingInterest(const ndn::Interest&, const nfd::FaceEndpoint&)::<lambda(const ndn::Interest&)> > (miss=..., hit=..., interest=..., this=0x555555720b90) at ../src/ndnSIM/NFD/daemon/table/cs.hpp:88
-#8  nfd::Forwarder::onIncomingInterest (this=0x5555557209e0, interest=..., ingress=...) at ../src/ndnSIM/NFD/daemon/fw/forwarder.cpp:161
-#9  0x00007ffff7dd4a26 in operator() (endpointId=<optimized out>, interest=..., __closure=<optimized out>) at ../src/ndnSIM/NFD/daemon/fw/forwarder.cpp:67
+#5  nfd::fw::Strategy::sendData (this=0x55555572fe30, data=..., egress=..., pitEntry=std::shared_ptr<nfd::pit::Entry> (use count 5, weak count 0) = {...}) at ../src/ndnSIM/NFD/daemon/fw/strategy.cpp:276
+#6  0x00007ffff7dd4d2e in operator() (d=..., i=..., __closure=0x7fffffffcae0) at ../src/ndnSIM/NFD/daemon/fw/forwarder.cpp:162
+#7  nfd::cs::Cs::find<nfd::Forwarder::onIncomingInterest(const ndn::Interest&, const nfd::FaceEndpoint&)::<lambda(const ndn::Interest&, const ndn::Data&)>, nfd::Forwarder::onIncomingInterest(const ndn::Interest&, const nfd::FaceEndpoint&)::<lambda(const ndn::Interest&)> > (miss=..., hit=..., interest=..., this=0x5555557218e0) at ../src/ndnSIM/NFD/daemon/table/cs.hpp:88
+#8  nfd::Forwarder::onIncomingInterest (this=0x555555721730, interest=..., ingress=...) at ../src/ndnSIM/NFD/daemon/fw/forwarder.cpp:161
+#9  0x00007ffff7dd4e36 in operator() (endpointId=<optimized out>, interest=..., __closure=<optimized out>) at ../src/ndnSIM/NFD/daemon/fw/forwarder.cpp:67
 #10 std::__invoke_impl<void, nfd::Forwarder::Forwarder(nfd::FaceTable&)::<lambda(const nfd::face::Face&)>::<lambda(const ndn::Interest&, const EndpointId&)>&, const ndn::Interest&, long unsigned int const&> (__f=...) at /usr/include/c++/11/bits/invoke.h:61
 #11 std::__invoke_r<void, nfd::Forwarder::Forwarder(nfd::FaceTable&)::<lambda(const nfd::face::Face&)>::<lambda(const ndn::Interest&, const EndpointId&)>&, const ndn::Interest&, long unsigned int const&> (__fn=...) at /usr/include/c++/11/bits/invoke.h:111
 #12 std::_Function_handler<void(const ndn::Interest&, long unsigned int const&), nfd::Forwarder::Forwarder(nfd::FaceTable&)::<lambda(const nfd::face::Face&)>::<lambda(const ndn::Interest&, const EndpointId&)> >::_M_invoke(const std::_Any_data &, const ndn::Interest &, const unsigned long &) (__functor=..., __args#0=..., __args#1=<optimized out>) at /usr/include/c++/11/bits/std_function.h:290
-#13 0x00007ffff7daea0d in std::function<void (ndn::Interest const&, unsigned long const&)>::operator()(ndn::Interest const&, unsigned long const&) const (__args#1=@0x7fffffffd070: 0, __args#0=..., this=0x555555725ae0) at /usr/include/c++/11/bits/std_function.h:590
-#14 ndn::util::signal::Signal<nfd::face::LinkService, ndn::Interest, unsigned long>::operator() (args#1=@0x7fffffffd070: 0, args#0=..., this=0x555555724848) at ns3/ndnSIM/ndn-cxx/util/signal/signal.hpp:233
-#15 nfd::face::LinkService::receiveInterest (this=this@entry=0x555555724840, interest=..., endpoint=@0x7fffffffd070: 0) at ../src/ndnSIM/NFD/daemon/face/link-service.cpp:100
-#16 0x00007ffff7da8bd0 in nfd::face::GenericLinkService::decodeInterest (this=0x555555724840, netPkt=..., firstPkt=..., endpointId=@0x7fffffffd070: 0) at ../src/ndnSIM/NFD/daemon/face/generic-link-service.cpp:435
-#17 0x00007ffff7daa738 in nfd::face::GenericLinkService::decodeNetPacket (this=0x555555724840, netPkt=..., firstPkt=..., endpointId=<optimized out>) at ../src/ndnSIM/NFD/daemon/face/generic-link-service.cpp:355
-#18 0x00007ffff7daaae9 in nfd::face::GenericLinkService::doReceivePacket (this=0x555555724840, packet=..., endpoint=@0x7fffffffd070: 0) at ../src/ndnSIM/NFD/daemon/face/generic-link-service.cpp:335
-#19 0x00007ffff7dada72 in operator() (__closure=<optimized out>) at ../src/ndnSIM/NFD/daemon/face/internal-transport.cpp:53
+#13 0x00007ffff7daee1d in std::function<void (ndn::Interest const&, unsigned long const&)>::operator()(ndn::Interest const&, unsigned long const&) const (__args#1=@0x7fffffffd070: 0, __args#0=..., this=0x555555726830) at /usr/include/c++/11/bits/std_function.h:590
+#14 ndn::util::signal::Signal<nfd::face::LinkService, ndn::Interest, unsigned long>::operator() (args#1=@0x7fffffffd070: 0, args#0=..., this=0x555555725598) at ns3/ndnSIM/ndn-cxx/util/signal/signal.hpp:233
+#15 nfd::face::LinkService::receiveInterest (this=this@entry=0x555555725590, interest=..., endpoint=@0x7fffffffd070: 0) at ../src/ndnSIM/NFD/daemon/face/link-service.cpp:100
+#16 0x00007ffff7da8fe0 in nfd::face::GenericLinkService::decodeInterest (this=0x555555725590, netPkt=..., firstPkt=..., endpointId=@0x7fffffffd070: 0) at ../src/ndnSIM/NFD/daemon/face/generic-link-service.cpp:435
+#17 0x00007ffff7daab48 in nfd::face::GenericLinkService::decodeNetPacket (this=0x555555725590, netPkt=..., firstPkt=..., endpointId=<optimized out>) at ../src/ndnSIM/NFD/daemon/face/generic-link-service.cpp:355
+#18 0x00007ffff7daaef9 in nfd::face::GenericLinkService::doReceivePacket (this=0x555555725590, packet=..., endpoint=@0x7fffffffd070: 0) at ../src/ndnSIM/NFD/daemon/face/generic-link-service.cpp:335
+#19 0x00007ffff7dade82 in operator() (__closure=<optimized out>) at ../src/ndnSIM/NFD/daemon/face/internal-transport.cpp:53
 #20 std::__invoke_impl<void, nfd::face::InternalForwarderTransport::receivePacket(const ndn::Block&)::<lambda()>&> (__f=...) at /usr/include/c++/11/bits/invoke.h:61
 #21 std::__invoke_r<void, nfd::face::InternalForwarderTransport::receivePacket(const ndn::Block&)::<lambda()>&> (__fn=...) at /usr/include/c++/11/bits/invoke.h:111
 #22 std::_Function_handler<void(), nfd::face::InternalForwarderTransport::receivePacket(const ndn::Block&)::<lambda()> >::_M_invoke(const std::_Any_data &) (__functor=...) at /usr/include/c++/11/bits/std_function.h:290
-#23 0x00007ffff6711a2e in ns3::DefaultSimulatorImpl::ProcessOneEvent (this=0x5555556348c0) at ../src/core/model/default-simulator-impl.cc:151
-#24 0x00007ffff6711aae in ns3::DefaultSimulatorImpl::Run (this=0x5555556348c0) at ../src/core/model/default-simulator-impl.cc:204
-#25 0x000055555556310b in main (argc=<optimized out>, argv=<optimized out>) at ../src/ndnSIM/examples/agg-mini/agg-mini-simulation.cpp:232
+#23 0x00007ffff670fa2e in ns3::DefaultSimulatorImpl::ProcessOneEvent (this=0x5555556348c0) at ../src/core/model/default-simulator-impl.cc:151
+#24 0x00007ffff670faae in ns3::DefaultSimulatorImpl::Run (this=0x5555556348c0) at ../src/core/model/default-simulator-impl.cc:204
+#25 0x00005555555633f6 in main (argc=<optimized out>, argv=<optimized out>) at ../src/ndnSIM/examples/agg-mini/agg-mini-simulation.cpp:268
 __gnu_cxx::__exchange_and_add_dispatch (__val=-1, __mem=0x8) at /usr/include/c++/11/ext/atomicity.h:99
-99            return __exchange_and_add_single(__mem, __val);
+99	      return __exchange_and_add_single(__mem, __val);
 A debugging session is active.
 
-        Inferior 1 [process 1138529] will be killed.
+	Inferior 1 [process 1174926] will be killed.
 
 Quit anyway? (y or n) [answered Y; input not from terminal]
-Debugging completed. Check logs in log_file/agg_mini_output.log

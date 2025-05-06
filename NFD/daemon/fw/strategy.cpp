@@ -32,6 +32,9 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
+#include <iostream> // <<< Add if missing
+#include <string>   // <<< Add if missing
+
 namespace nfd {
 namespace fw {
 
@@ -247,6 +250,13 @@ Strategy::sendInterest(const Interest& interest, Face& egress, const shared_ptr<
 bool
 Strategy::sendData(const Data& data, Face& egress, const shared_ptr<pit::Entry>& pitEntry)
 {
+  // Only keep the null check at the beginning
+  if (pitEntry == nullptr) {
+    std::cerr << "FATAL ERROR in Strategy::sendData: pitEntry is NULL for data=" 
+              << data.getName() << ", egressFaceId=" << egress.getId() << std::endl;
+    abort(); // Force crash if pitEntry is null
+  }
+
   BOOST_ASSERT(pitEntry->getInterest().matchesData(data));
 
   shared_ptr<lp::PitToken> pitToken;
@@ -255,24 +265,23 @@ Strategy::sendData(const Data& data, Face& egress, const shared_ptr<pit::Entry>&
     pitToken = inRecord->getInterest().getTag<lp::PitToken>();
   }
 
-  // delete the PIT entry's in-record based on egress,
-  // since the Data is sent to the face from which the Interest was received
+  // Delete the PIT entry's in-record based on egress
   pitEntry->deleteInRecord(egress);
 
   if (pitToken != nullptr) {
-    Data data2 = data; // make a copy so each downstream can get a different PIT token
+    Data data2 = data; // make a copy
     data2.setTag(pitToken);
     return m_forwarder.onOutgoingData(data2, egress);
   }
-  m_forwarder.onOutgoingData(data, egress);
 
-  if (pitEntry->getInRecords().empty()) { // if nothing left, "closing down" the entry
-    // set PIT expiry timer to now
+  bool result = m_forwarder.onOutgoingData(data, egress);
+
+  if (pitEntry->getInRecords().empty()) {
     m_forwarder.setExpiryTimer(pitEntry, 0_ms);
-
-    // mark PIT satisfied
     pitEntry->isSatisfied = true;
   }
+  
+  return result;
 }
 
 void
